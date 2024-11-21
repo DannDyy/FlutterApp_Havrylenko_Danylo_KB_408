@@ -5,6 +5,7 @@ import '../entity/task.dart';
 import '../widgets/add_task_form.dart';
 import '../widgets/progress_overview.dart';
 import '../widgets/task_card.dart';
+import 'services/api.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,11 +20,15 @@ class HomePageState extends State<HomePage> {
   final TextEditingController stepsController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
+  String _randomQuote = '';
+  String _weather = '';
 
   @override
   void initState() {
     super.initState();
     _loadTasks();
+    _fetchRandomQuote();
+    _fetchWeather();
     _checkInternetConnection();
   }
 
@@ -46,6 +51,19 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _fetchRandomQuote() async {
+    final quote = await fetchRandomQuote();
+    setState(() {
+      _randomQuote = quote;
+    });
+  }
+
+  Future<void> _fetchWeather() async {
+    final weather = await fetchWeather();
+    setState(() {
+      _weather = weather;
+    });
+  }
 
   Future<void> _checkInternetConnection() async {
     final hasConnection = await InternetConnectionChecker().hasConnection;
@@ -117,6 +135,22 @@ class HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_randomQuote.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Text(
+                  _randomQuote,
+                  style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
+                ),
+              ),
+            if (_weather.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Text(
+                  _weather,
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
             ProgressOverview(tasks: tasks),
             const SizedBox(height: 20),
             Expanded(
