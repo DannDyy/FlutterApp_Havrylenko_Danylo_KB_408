@@ -1,11 +1,11 @@
 {
-    "name": "lab3",
-    "short_name": "lab3",
+    "name": "lab4",
+    "short_name": "lab4",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "lab3",
+    "description": "laba4",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

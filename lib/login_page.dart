@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -15,6 +16,12 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage = '';
 
   Future<void> _login() async {
+    final hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      _showErrorDialog('Немає підключення до інтернету.');
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final savedEmail = prefs.getString('email');
     final savedPassword = prefs.getString('password');
@@ -28,6 +35,22 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     }
+  }
+
+  Future<void> _showErrorDialog(String message) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Помилка'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('ОК'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

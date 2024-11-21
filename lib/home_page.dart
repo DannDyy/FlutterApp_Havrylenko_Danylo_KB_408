@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import '../entity/task.dart';
 import '../widgets/add_task_form.dart';
 import '../widgets/progress_overview.dart';
 import '../widgets/task_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   HomePageState createState() => HomePageState();
@@ -16,14 +17,16 @@ class HomePageState extends State<HomePage> {
   final List<Task> tasks = [];
   final TextEditingController taskController = TextEditingController();
   final TextEditingController stepsController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
 
   @override
   void initState() {
     super.initState();
-    _loadTasks();  // Завантажуємо задачі при запуску сторінки
+    _loadTasks();
+    _checkInternetConnection();
   }
 
-  // Завантаження задач з SharedPreferences
   Future<void> _loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
     final taskList = prefs.getStringList('tasks') ?? [];
@@ -32,28 +35,68 @@ class HomePageState extends State<HomePage> {
       tasks.addAll(taskList.map((task) {
         final taskParts = task.split(',');
         return Task(
-          taskParts[0],
-          int.parse(taskParts[1]),
-          int.parse(taskParts[2]),
-          isStepTask: taskParts[1] != '0', // Перевірка, чи є етапи
+          name: taskParts[0],
+          totalSteps: int.parse(taskParts[1]),
+          completedSteps: int.parse(taskParts[2]),
+          isStepTask: taskParts[1] != '0',
+          description: taskParts.length > 3 ? taskParts[3] : '',
+          recommendation: taskParts.length > 4 ? taskParts[4] : '',
         );
       }).toList());
     });
   }
 
-  // Збереження задач у SharedPreferences
+
+  Future<void> _checkInternetConnection() async {
+    final hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      _showInternetErrorDialog('Зв\'язок з інтернетом втрачено. Дані можуть бути недоступні.');
+    }
+  }
+
+  Future<void> _showInternetErrorDialog(String message) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Помилка'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('ОК'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _saveTasks() async {
     final prefs = await SharedPreferences.getInstance();
     final taskStrings = tasks.map((task) =>
-    '${task.name},${task.totalSteps},${task.completedSteps},${task.isStepTask}').toList();
+    '${task.name},${task.totalSteps},${task.completedSteps},${task.description},${task.recommendation}').toList();
     await prefs.setStringList('tasks', taskStrings);
   }
 
-  // Функція видалення задачі
   void _deleteTask(int index) {
     setState(() {
-      tasks.removeAt(index);  // Видаляємо задачу з списку
-      _saveTasks();  // Зберігаємо оновлений список задач
+      tasks.removeAt(index);
+      _saveTasks();
+    });
+  }
+
+  void _addTask(String name, int totalSteps, String description, bool isStepTask) {
+    final newTask = Task(
+      name: name,
+      totalSteps: isStepTask ? totalSteps : 0,
+      completedSteps: 0,
+      isStepTask: isStepTask,
+      description: description,
+      recommendation: '',
+    );
+
+    setState(() {
+      tasks.add(newTask);
+      _saveTasks();
     });
   }
 
@@ -65,9 +108,7 @@ class HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
           ),
         ],
       ),
@@ -87,7 +128,7 @@ class HomePageState extends State<HomePage> {
                     task: task,
                     onIncrement: task.isStepTask ? () => _incrementCompletedSteps(task) : null,
                     onDecrement: task.isStepTask ? () => _decrementCompletedSteps(task) : null,
-                    onDelete: () => _deleteTask(index), // Передаємо функцію видалення
+                    onDelete: () => _deleteTask(index),
                   );
                 },
               ),
@@ -95,52 +136,33 @@ class HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      floatingActionButton: _buildFloatingActions(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddTaskDialog,
+        tooltip: 'Add Task',
+        backgroundColor: Colors.purple,
+        child: const Icon(Icons.add, color: Colors.white, size: 40),
+      ),
     );
   }
 
-  // Плаваюча кнопка для додавання задачі
-  Widget _buildFloatingActions() {
-    return Stack(
-      children: [
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: FloatingActionButton(
-            onPressed: _showAddTaskDialog,
-            tooltip: 'Add Task',
-            backgroundColor: Colors.purple,
-            child: const Icon(
-              Icons.add,
-              color: Colors.white,
-              size: 40,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Збільшення виконаних етапів
   void _incrementCompletedSteps(Task task) {
     setState(() {
       if (task.completedSteps < task.totalSteps) {
         task.completedSteps++;
       }
-      _saveTasks();  // Зберігаємо задачі при кожній зміні
+      _saveTasks();
     });
   }
 
-  // Зменшення виконаних етапів
   void _decrementCompletedSteps(Task task) {
     setState(() {
       if (task.completedSteps > 0) {
         task.completedSteps--;
       }
-      _saveTasks();  // Зберігаємо задачі при кожній зміні
+      _saveTasks();
     });
   }
 
-  // Діалог для додавання нової задачі
   void _showAddTaskDialog() {
     showDialog<void>(
       context: context,
@@ -150,38 +172,19 @@ class HomePageState extends State<HomePage> {
           content: AddTaskForm(
             taskController: taskController,
             stepsController: stepsController,
-            onAddTask: _addTask,
+            descriptionController: descriptionController,
+            onAddTask: (String name, int steps, String description, bool isStepTask) {
+              _addTask(name, steps, description, isStepTask);
+            },
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('Close'),
             ),
           ],
         );
       },
     );
-  }
-
-  // Функція для додавання нової задачі
-  void _addTask() {
-    final String name = taskController.text;
-    final int totalSteps = int.tryParse(stepsController.text) ?? 0;
-
-    if (name.isNotEmpty && totalSteps >= 0) {
-      setState(() {
-        tasks.add(Task(
-          name,
-          totalSteps,
-          0,
-          isStepTask: totalSteps > 0, // Якщо кількість етапів більша за 0, задача з етапами
-        ));
-        _saveTasks();  // Зберігаємо задачу
-        taskController.clear();
-        stepsController.clear();
-      });
-    }
   }
 }

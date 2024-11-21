@@ -2,7 +2,16 @@ class Task {
   final String name;
   final int totalSteps;
   int completedSteps;
-  final bool isStepTask; // Додаємо властивість, яка визначає, чи задача має етапи
+  final bool isStepTask;
+  final String description;
+  final String recommendation;
 
-  Task(this.name, this.totalSteps, this.completedSteps, {this.isStepTask = false}); // Оновлюємо конструктор
+  Task({
+    required this.name,
+    required this.totalSteps,
+    required this.completedSteps,
+    required this.isStepTask,
+    required this.description,
+    required this.recommendation,
+  });
 }

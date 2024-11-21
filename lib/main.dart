@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 import 'registration_page.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final isLoggedIn = prefs.containsKey('email');
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
+  final bool isLoggedIn;
+
+  MyApp({required this.isLoggedIn});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Task Manager',
-      theme: ThemeData(
-        primarySwatch: Colors.purple,
-      ),
-      initialRoute: '/',
+      theme: ThemeData(primarySwatch: Colors.purple),
+      initialRoute: isLoggedIn ? '/home' : '/',
       routes: {
         '/': (context) => const LandingPage(),
         '/login': (context) => const LoginPage(),
@@ -42,9 +48,7 @@ class LandingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/login');
-              },
+              onPressed: () => Navigator.pushNamed(context, '/login'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
                 backgroundColor: Colors.white,
@@ -54,9 +58,7 @@ class LandingPage extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/registration');
-              },
+              onPressed: () => Navigator.pushNamed(context, '/registration'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
                 backgroundColor: Colors.purple,
