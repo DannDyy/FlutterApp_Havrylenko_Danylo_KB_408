@@ -1,6 +1,6 @@
-# lab2
+# lab3
 
-Lab2
+lab3
 
 ## Getting Started
 
