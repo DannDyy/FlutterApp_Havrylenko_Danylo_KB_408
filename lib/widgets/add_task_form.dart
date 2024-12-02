@@ -1,38 +1,64 @@
 import 'package:flutter/material.dart';
 
-class AddTaskForm extends StatelessWidget {
+class AddTaskForm extends StatefulWidget {
   final TextEditingController taskController;
   final TextEditingController stepsController;
-  final VoidCallback onAddTask;
+  final TextEditingController descriptionController;
+  final Function(String, int, String, bool) onAddTask;
 
   const AddTaskForm({
+    Key? key,
     required this.taskController,
     required this.stepsController,
+    required this.descriptionController,
     required this.onAddTask,
-    super.key,
-  });
+  }) : super(key: key);
+
+  @override
+  State<AddTaskForm> createState() => _AddTaskFormState();
+}
+
+class _AddTaskFormState extends State<AddTaskForm> {
+  bool isStepTask = true;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         TextField(
-          controller: taskController,
+          controller: widget.taskController,
           decoration: const InputDecoration(labelText: 'Назва задачі'),
         ),
-        TextField(
-          controller: stepsController,
-          decoration: const InputDecoration(labelText: 'Кількість кроків'),
-          keyboardType: TextInputType.number,
+        CheckboxListTile(
+          title: const Text('Задача без кроків'),
+          value: !isStepTask,
+          onChanged: (value) {
+            setState(() {
+              isStepTask = !(value ?? false);
+              if (!isStepTask) widget.stepsController.text = '0';
+            });
+          },
         ),
-        const SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: onAddTask,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple,
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+        if (isStepTask)
+          TextField(
+            controller: widget.stepsController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Кількість кроків'),
           ),
-          child: const Text('Додати задачу', style: TextStyle(color: Colors.white)),
+        TextField(
+          controller: widget.descriptionController,
+          decoration: const InputDecoration(labelText: 'Опис (необов\'язково)'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final name = widget.taskController.text.trim();
+            final steps = int.tryParse(widget.stepsController.text.trim()) ?? 0;
+            final description = widget.descriptionController.text.trim();
+            widget.onAddTask(name, steps, description, isStepTask);
+            Navigator.of(context).pop(); // Закриває діалогове вікно після додавання задачі
+          },
+          child: const Text('Додати задачу'),
         ),
       ],
     );

@@ -27,19 +27,17 @@ class ProfilePage extends StatelessWidget {
           appBar: AppBar(
             title: const Text('Профіль'),
           ),
-          body: Center( // Центруємо всі елементи
+          body: Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Щоб елементи займали мінімальну висоту
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const CircleAvatar(
                     radius: 50,
                     backgroundImage: AssetImage('assets/default_profile_picture.jpg'),
                   ),
                   const SizedBox(height: 20),
-
                   Text(
                     'Ім\'я: ${data['name']}',
                     style: const TextStyle(
@@ -48,19 +46,34 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-
-                  // Електронна пошта
                   Text(
                     'Електронна пошта: ${data['email']}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
+                    style: const TextStyle(fontSize: 18),
                   ),
                   const SizedBox(height: 20),
-
                   ElevatedButton(
                     onPressed: () async {
-                      Navigator.pushReplacementNamed(context, '/login');
+                      final result = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Вихід'),
+                          content: const Text('Ви дійсно хочете вийти?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Ні'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Так'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (result == true) {
+                        Navigator.pushReplacementNamed(context, '/login');
+                      }
                     },
                     child: const Text('Вийти'),
                   ),

@@ -1,20 +1,22 @@
-name: lab3
-description: "lab3"
+name: lab4
+description: "laba4"
 
 publish_to: 'none'
+
 
 version: 1.0.0+1
 
 environment:
   sdk: ^3.5.3
 
-
 dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.0.17
-  flutter_local_notifications: ^12.0.0
   cupertino_icons: ^1.0.8
+  http: ^1.1.0
+  internet_connection_checker: ^1.0.0
+
 
 dev_dependencies:
   flutter_test:
@@ -27,4 +29,6 @@ dev_dependencies:
 flutter:
   assets:
     - assets/default_profile_picture.jpg
+
   uses-material-design: true
+
