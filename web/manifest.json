@@ -1,11 +1,11 @@
 {
-    "name": "lab5",
-    "short_name": "lab5",
+    "name": "lab7",
+    "short_name": "lab7",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Laba5",
+    "description": "Laba 7",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,6 +1,6 @@
-# lab5
+# lab7
 
-Laba5
+Laba 7
 
 ## Getting Started
 

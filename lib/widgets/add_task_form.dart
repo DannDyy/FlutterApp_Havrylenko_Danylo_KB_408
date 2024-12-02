@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flashlight_plugin/flashlight_plugin.dart';
 
 class AddTaskForm extends StatefulWidget {
   final TextEditingController taskController;
@@ -20,6 +21,32 @@ class AddTaskForm extends StatefulWidget {
 
 class _AddTaskFormState extends State<AddTaskForm> {
   bool isStepTask = true;
+
+  // Перевірка на ключову фразу та ввімкнення ліхтаря
+  Future<void> _checkForSecret(String description) async {
+    if (description.toLowerCase() == 'avada kedavra') {
+      final isFlashOn = await FlashlightPlugin.toggleFlashlight();
+      if (isFlashOn != null && isFlashOn) {
+        _showSecretFoundDialog();
+      }
+    }
+  }
+
+  void _showSecretFoundDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Секрет знайдено!"),
+        content: const Text("Ліхтарик увімкнено."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("ОК"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +78,18 @@ class _AddTaskFormState extends State<AddTaskForm> {
           decoration: const InputDecoration(labelText: 'Опис (необов\'язково)'),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             final name = widget.taskController.text.trim();
             final steps = int.tryParse(widget.stepsController.text.trim()) ?? 0;
             final description = widget.descriptionController.text.trim();
+
+            // Перевірка секрету перед додаванням задачі
+            await _checkForSecret(description);
+
             widget.onAddTask(name, steps, description, isStepTask);
-            Navigator.of(context).pop(); // Закриває діалогове вікно після додавання задачі
+
+            // Закриття діалогу після завершення
+            Navigator.of(context).pop();
           },
           child: const Text('Додати задачу'),
         ),

@@ -32,6 +32,8 @@ class HomePageState extends State<HomePage> {
     _checkInternetConnection();
   }
 
+
+
   Future<void> _loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
     final taskList = prefs.getStringList('tasks') ?? [];

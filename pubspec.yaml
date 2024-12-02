@@ -1,8 +1,7 @@
-name: lab5
-description: "Laba5"
+name: lab7
+description: "Laba 7"
 
 publish_to: 'none'
-
 
 version: 1.0.0+1
 
@@ -16,6 +15,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.1.0
   internet_connection_checker: ^1.0.0
+  flashlight_plugin:
+    path: ./flashlight_plugin
 
 
 dev_dependencies:
