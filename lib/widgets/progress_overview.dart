@@ -24,11 +24,11 @@ class ProgressOverview extends StatelessWidget {
         LinearProgressIndicator(
           value: completionRate,
           backgroundColor: Colors.grey[300],
-          color: Colors.blue,
+          color: Colors.purple,
         ),
         const SizedBox(height: 10),
-        Text('Завершено: $completedSteps етапів'),
-        Text('Виконано: $pendingSteps етапів'),
+        Text('Завершено: $completedSteps кроків'),
+        Text('Виконано: $pendingSteps кроків'),
       ],
     );
   }

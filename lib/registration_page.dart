@@ -1,58 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class RegistrationPage extends StatelessWidget {
-  const RegistrationPage({super.key});
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({Key? key}) : super(key: key);
+
+  @override
+  _RegistrationPageState createState() => _RegistrationPageState();
+}
+
+class _RegistrationPageState extends State<RegistrationPage> {
+  final _emailController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String? _errorMessage = '';
+
+  Future<void> _register() async {
+    if (_formKey.currentState!.validate()) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('email', _emailController.text);
+      prefs.setString('name', _nameController.text);
+      prefs.setString('password', _passwordController.text);
+
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      setState(() {
+        _errorMessage = 'Введені дані не правильні!';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Зареєструватися'),
+        title: const Text('Реєстрація'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: _buildTextField('Ім\'я користувача'),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: _buildTextField('Email'),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: _buildTextField('Пароль', isPassword: true),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: _buildButton('Зареєструватися', () {
-                Navigator.pushNamed(context, '/home');
-              }),
-            ),
-          ],
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Ім\'я'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Будь ласка, введіть ім\'я';
+                  }
+                  if (RegExp(r'\d').hasMatch(value)) {
+                    return 'Ім\'я не повинно містити цифр';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Електронна пошта'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Будь ласка, введіть електронну пошту';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Будь ласка, введіть правильну пошту';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Пароль'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Будь ласка, введіть пароль';
+                  }
+                  return null;
+                },
+              ),
+              if (_errorMessage != null)
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ElevatedButton(
+                onPressed: _register,
+                child: const Text('Зареєструватися'),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(String label, {bool isPassword = false}) {
-    return TextFormField(
-      obscureText: isPassword,
-      decoration: InputDecoration(labelText: label),
-    );
-  }
-
-  Widget _buildButton(String text, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 15.0), // Більший падінг для кнопки
-      ),
-      child: Text(text),
     );
   }
 }

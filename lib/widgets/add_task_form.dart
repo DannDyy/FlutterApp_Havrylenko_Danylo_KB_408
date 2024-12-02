@@ -22,14 +22,14 @@ class AddTaskForm extends StatelessWidget {
         ),
         TextField(
           controller: stepsController,
-          decoration: const InputDecoration(labelText: 'Кількість етапів'),
+          decoration: const InputDecoration(labelText: 'Кількість кроків'),
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 10),
         ElevatedButton(
           onPressed: onAddTask,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple,  // Фіолетовий колір кнопки
+            backgroundColor: Colors.purple,
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
           ),
           child: const Text('Додати задачу', style: TextStyle(color: Colors.white)),
